@@ -23,7 +23,7 @@ type student struct {
 
 func main() {
 
-	fmt.Println(ansi.Green,`
+	fmt.Println(ansi.Green, `
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$$$$$_$$$$$$$$$$$$$$$$_$$$$$$$$$$$$$$$
@@ -54,13 +54,29 @@ $$$$$$$$$$$$$$$$$______$$$$$$_____$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$$$$$______$$$$$$_____$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$$$$$______$$$$$$_____$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-`,ansi.Reset)
-	fmt.Println("Programmet vil vise dig medkursister samme prioriteter som dig,\n" +
-		"og lignende ambitionsniveau.")
+`, ansi.Reset)
+	fmt.Println("Programmet vil vise dig medkursister med samme prioriteter som dig,\n" +
+		"og lignende ambitionsniveau. (Windowsbrugere brug powershell!)\n\n")
 	data := get_data()
 	you := main_flow(data)
-	get_possible_groupmates(you, data, 0)
+	i := get_prioritet()
+	get_possible_groupmates(you, data, i-1)
 
+}
+
+func get_prioritet() int {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print(ansi.Color("Prioritets nr: ","blue+b"))
+		no, _ := reader.ReadString('\n')
+		i, err := strconv.Atoi(strings.Trim(no, "\n\t\r"))
+		if err != nil || (i != 1 && i != 2 && i != 3) {
+			fmt.Println(ansi.Cyan + " -> " + ansi.Red + "Du skal bare skrive 1, 2 eller 3..." + ansi.Reset)
+		} else {
+			return i
+		}
+
+	}
 }
 
 func main_flow(data []student) student {
@@ -73,7 +89,6 @@ func main_flow(data []student) student {
 		if match {
 			svar, you := findStudent(data, studienummer)
 			if you != nil {
-				fmt.Println(ansi.Cyan+" ->"+ansi.Reset, svar)
 				return *you
 			} else {
 				fmt.Println(ansi.Cyan+" ->"+ansi.Reset, svar)
@@ -120,13 +135,15 @@ func get_possible_groupmates(you student, students []student, i int) {
 			get_helper(you, e)
 		}
 	}
-
+	fmt.Println(ansi.Cyan+"\nStudenter som skrives med "+
+		ansi.Red+"rød farve"+ansi.Cyan+
+		" har et ambitionsniveau > 10% i forhold til dit ambitions niveau"+ansi.Reset)
 }
 
 func findStudent(students []student, student string) (string, *student) {
 	for _, e := range students {
 		if e.ID == student {
-			return ansi.Green + "Registrering påbegyndes, vent venligst" + ansi.Reset, &e
+			return ansi.Green + "Godkendt!" + ansi.Reset, &e
 		}
 	}
 	return ansi.Red + "student med nummer " + student + " fides ikke på listen" + ansi.Reset, nil
